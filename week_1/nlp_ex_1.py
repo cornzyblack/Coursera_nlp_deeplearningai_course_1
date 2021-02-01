@@ -21,33 +21,38 @@ freq_count = None
 
 @st.cache(allow_output_mutation=True)
 def get_positive_data():
-    return []
+    return [], []
 
 
 @st.cache(allow_output_mutation=True)
 def get_negative_data():
-    return []
+    return [], []
 
 
 with positive_div:
     positive_input_text = st.text_input(label="Enter positve tweet")
+    add_pos_tweet = st.button("Add +ve tweet")
 
 with negative_div:
     negative_input_text = st.text_input(label="Enter negative tweet")
-
-add_tweet = st.button("Add tweet")
+    add_neg_tweet = st.button("Add -ve tweet")
 
 create_vocabulary = st.button("Create vocabulary")
 
-if add_tweet and positive_input_text:
-    get_positive_data().append(positive_input_text)
+if add_pos_tweet and positive_input_text:
+    get_positive_data()[0].append(positive_input_text)
+    get_positive_data()[1].append("+")
 
-if add_tweet and negative_input_text:
-    get_negative_data().append(negative_input_text)
+if add_neg_tweet and negative_input_text:
+    get_negative_data()[0].append(negative_input_text)
+    get_negative_data()[1].append("-")
 
 
 tweet_df = pd.DataFrame(
-    data=get_positive_data() + get_negative_data(), columns=["Tweets"]
+    data={
+        "tweets": get_positive_data()[0] + get_negative_data()[0],
+        "polarity": get_positive_data()[1] + get_negative_data()[1],
+    }
 )
 
 if not tweet_df.empty:
@@ -55,11 +60,14 @@ if not tweet_df.empty:
 
 
 if create_vocabulary:
-    vocabulary = tweet_df["Tweets"].str.split(" ").explode()
-    set_tweets = pd.unique(tweet_df["Tweets"].str.split(" ").explode())
-    st.write(set_tweets)
+    vocabulary = tweet_df["tweets"].str.split(" ").explode()
+    set_tweets = pd.unique(tweet_df["tweets"].str.split(" ").explode())
+
+    """### Unique Words"""
+    st.write(pd.DataFrame(data={"word": set_tweets}))
 
     freq_count = vocabulary.value_counts()
+    """### Word Count"""
     st.write(freq_count.T)
 
 
